@@ -45,6 +45,7 @@ function drawGate(container=page){
  const choices=boardData?.rows||[];
  if(!choices.length)c.append(el('p',boardData?'还没有孩子，可在下方创建。':'正在读取孩子列表…','muted'));
  for(const child of choices)row(c,child.name,btn('选择并进入',()=>chooseExisting(child.id),'primary'),child.count+'/4 科已完成');
+ const imp=el('details'),impTitle=el('summary','导入已有孩子身份'),impForm=el('form'),impKey=el('input'),impBtn=el('button','导入并进入','primary');impKey.placeholder='输入已有身份码';impKey.required=true;impBtn.type='submit';impForm.append(impKey,impBtn);impForm.onsubmit=async e=>{e.preventDefault();await selectChild(impKey.value.trim())};imp.append(impTitle,impForm);c.append(imp);
  const f=el('form'),name=el('input'),submit=el('button','创建孩子','primary');name.placeholder='新孩子昵称';name.required=true;name.maxLength=16;submit.type='submit';f.append(name,submit);f.onsubmit=async e=>{e.preventDefault();const ok=await act('join',{name:name.value},crypto.randomUUID());if(ok)await finishPending()};const detail=el('details'),summary=el('summary','没有这个孩子？创建新孩子');detail.append(summary,f);c.append(detail);container.append(c)
 }
 async function chooseExisting(id){if(busy)return;try{const saved=savedChildren().find(c=>c.id===id&&!c.deleted);if(saved){await selectChild(saved.key);return}const f=new FormData();f.set('child',id);const data=await api('children/select',f,'');await selectChild(data.session)}catch(e){fail(e)}}
