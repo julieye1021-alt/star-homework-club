@@ -1,12 +1,17 @@
 export default async function onRequest(context) {
   const request = context.request;
   const incoming = new URL(request.url);
-  const target = "https://star-homework-club-julie.julieye1021.chatgpt.site" + incoming.pathname + incoming.search;
+  const target = "https://lucky-semolina-a75311.netlify.app" + incoming.pathname + incoming.search;
 
   try {
+    const headers = new Headers(request.headers);
+    headers.delete("host");
+    headers.delete("content-length");
+
     const init = {
       method: request.method,
-      headers: request.headers
+      headers,
+      redirect: "follow"
     };
 
     if (request.method !== "GET" && request.method !== "HEAD") {
@@ -14,16 +19,21 @@ export default async function onRequest(context) {
     }
 
     const upstream = await fetch(target, init);
+    const text = await upstream.text();
+    const responseHeaders = new Headers(upstream.headers);
+    responseHeaders.delete("content-encoding");
+    responseHeaders.delete("content-length");
+    responseHeaders.set("cache-control", "no-store");
 
-    return new Response(upstream.body, {
+    return new Response(text, {
       status: upstream.status,
-      headers: upstream.headers
+      statusText: upstream.statusText,
+      headers: responseHeaders
     });
   } catch (error) {
     return new Response(JSON.stringify({
-      ok: false,
-      stage: "edge-proxy",
-      error: String(error)
+      error: "API proxy failed",
+      message: String(error)
     }), {
       status: 502,
       headers: {
