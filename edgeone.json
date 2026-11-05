@@ -1,0 +1,19 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/*",
+      "destination": "https://star-homework-club-julie.julieye1021.chatgpt.site/api/:splat"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=60, stale-while-revalidate=300"
+        }
+      ]
+    }
+  ]
+}
