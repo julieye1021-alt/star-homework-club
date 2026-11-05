@@ -7,6 +7,8 @@ export default async function onRequest(context) {
     const headers = new Headers(request.headers);
     headers.delete("host");
     headers.delete("content-length");
+    headers.delete("origin");
+    headers.delete("referer");
 
     const init = {
       method: request.method,
@@ -19,13 +21,13 @@ export default async function onRequest(context) {
     }
 
     const upstream = await fetch(target, init);
-    const text = await upstream.text();
+    const body = await upstream.text();
     const responseHeaders = new Headers(upstream.headers);
     responseHeaders.delete("content-encoding");
     responseHeaders.delete("content-length");
     responseHeaders.set("cache-control", "no-store");
 
-    return new Response(text, {
+    return new Response(body, {
       status: upstream.status,
       statusText: upstream.statusText,
       headers: responseHeaders
